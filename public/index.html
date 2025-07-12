@@ -15,7 +15,6 @@
 </head>
 <body>
 
-    <!-- Conteúdo HTML original colado aqui -->
     <!-- Tela Home -->
     <div id="home-screen" class="screen active">
         <header class="header">
@@ -54,16 +53,20 @@
                 </button>
             </div>
             <div id="player-list" class="player-list"></div>
+            <!-- NOTA ADICIONADA -->
+            <div class="player-link-note">
+                <p>Envie este link para os jogadores: <a href="/player" target="_blank">/player</a></p>
+            </div>
         </div>
         <div class="actions">
             <button id="end-betting-btn-home" class="btn btn-outline">Finalizar Apostas</button>
             <button id="distribute-btn" class="btn btn-distribute">Distribuir</button>
-            <button id="reset-btn" class="btn btn-reset-all">Resetar Fichas de Todos</button>
+            <button id="reset-btn" class="btn btn-reset-all">Resetar Jogo</button>
         </div>
     </div>
 
     <!-- Tela de Ordem de Jogo -->
-    <div id="order-screen" class="screen">
+    <div id="order-screen" class="sub-screen">
         <div class="card ranking-card">
              <div class="card-title-container">
                 <h2 class="card-title">ORDEM DE JOGO</h2>
@@ -84,11 +87,11 @@
     </div>
 
     <!-- Tela de Aposta -->
-    <div id="bet-screen" class="screen">
+    <div id="bet-screen" class="sub-screen">
         <header class="sub-screen-header">
-            <div id="bet-prev-player" class="nav-arrow">&lt;</div>
+            <button id="bet-prev-player" class="nav-arrow">&lt;</button>
             <div id="bet-player-name" class="player-name-display">JOGADOR 1</div>
-            <div id="bet-next-player" class="nav-arrow">&gt;</div>
+            <button id="bet-next-player" class="nav-arrow">&gt;</button>
         </header>
         <div class="sub-screen-main-content">
             <div class="top-info-row">
@@ -109,7 +112,7 @@
             <div class="chip-area" id="bet-remove-area">
                 <div class="chip-area-title">Remover</div>
                 <div id="bet-stack-visualizer" class="chip-stack-visualizer"></div>
-                <button id="clear-bet-btn">Limpar</button>
+                <button id="clear-bet-btn" class="btn" style="background-color: var(--bg-accent); color: white; width: 100%; margin-top: 1rem;">Limpar</button>
             </div>
             <div class="chip-area">
                 <div class="chip-area-title">Apostar</div>
@@ -118,7 +121,6 @@
         </div>
         <footer class="sub-screen-footer">
             <div class="footer-top-row">
-                <button class="btn prev-btn" data-target="bet">&lt;<br>Ant.</button>
                 <button class="btn home-btn">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M3 9.5L12 4L21 9.5V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9.5Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
@@ -132,11 +134,11 @@
     </div>
 
     <!-- Tela de Gerenciamento -->
-    <div id="manage-screen" class="screen">
+    <div id="manage-screen" class="sub-screen">
         <header class="sub-screen-header">
-            <div id="manage-prev-player" class="nav-arrow">&lt;</div>
+            <button id="manage-prev-player" class="nav-arrow">&lt;</button>
             <div id="manage-player-name" class="player-name-display">JOGADOR 1 <span class="edit-icon">✎</span></div>
-            <div id="manage-next-player" class="nav-arrow">&gt;</div>
+            <button id="manage-next-player" class="nav-arrow">&gt;</button>
         </header>
         <div class="sub-screen-main-content">
             <div class="card total-display-card">
@@ -154,7 +156,6 @@
         </div>
         <footer class="sub-screen-footer">
              <div class="footer-top-row">
-                <button class="btn prev-btn" data-target="manage">&lt;<br>Ant.</button>
                 <button class="btn home-btn">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M3 9.5L12 4L21 9.5V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9.5Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
@@ -167,11 +168,11 @@
     </div>
     
     <!-- Tela de Configurações do Timer -->
-    <div id="settings-screen" class="screen">
+    <div id="settings-screen" class="sub-screen">
         <header class="sub-screen-header">
             <div class="nav-arrow" style="visibility: hidden;">&lt;</div>
             <div class="player-name-display">TIMER</div>
-            <div class="nav-arrow home-btn" style="font-size: 1.5rem;">✖</div>
+            <button class="nav-arrow home-btn" style="font-size: 1.5rem;">✖</button>
         </header>
         <div class="card timer-config-card">
             <div class="level-nav">
@@ -196,7 +197,7 @@
         </footer>
     </div>
 
-    <!-- Scripts do Cliente -->
+    <!-- External JavaScript -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
 </body>
