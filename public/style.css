@@ -1,14 +1,663 @@
-body {
-  font-family: sans-serif;
-  text-align: center;
-  background: #006400;
-  color: white;
+:root {
+    --bg-dark: #0d1117;
+    --bg-card: #161b22;
+    --bg-accent: #21262d;
+    --border-color: #30363d;
+    --text-light: #c9d1d9;
+    --text-medium: #8b949e;
+    --text-dark: #111827;
+    --primary: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #fbbf24;
+    --bg-overlay: rgba(255, 255, 255, 0.15);
+    
+    /* Chip Colors */
+    --chip-blue-bg: #3B82F6;
+    --chip-white-bg: #FFFFFF;
+    --chip-black-bg: #212121;
+    --chip-green-bg: #22C55E;
+    --chip-red-bg: #EF4444;
+
+    --chip-dark-outline: rgba(0, 0, 0, 0.3);
+    --chip-light-outline: rgba(255, 255, 255, 0.15);
 }
 
-#mesa {
-  margin-top: 50px;
-  background: #228B22;
-  padding: 20px;
-  border-radius: 10px;
-  display: inline-block;
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { 
+    height: 100%; 
+}
+
+body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Roboto Mono', monospace; }
+.hidden { display: none !important; }
+
+.screen { 
+    height: 100vh; 
+    padding: 1.5rem 1rem; 
+    display: none; /* Começa escondido */
+    flex-direction: column; 
+    gap: 1rem;
+    overflow-y: auto;
+}
+
+.screen.active {
+    display: flex; /* Mostra a tela ativa */
+}
+
+
+#home-screen { gap: 1rem; }
+
+.card { background-color: var(--bg-card); border-radius: 10px; padding: 1rem; border: 1px solid var(--border-color); }
+.btn { border: none; border-radius: 12px; padding: 0.75rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: 'Teko', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+#home-screen .header { 
+    display: flex; 
+    justify-content: center; 
+    align-items: flex-start; 
+    padding: 0; 
+    flex-shrink: 0;
+    position: relative;
+    height: 60px;
+}
+#home-screen .header-block { text-align: center; flex: 1 1 0; }
+#home-screen .header-label { 
+    font-family: 'Teko', sans-serif; 
+    font-size: 14.7px;
+    color: var(--text-medium);
+    text-transform: uppercase;
+    line-height: 1;
+}
+#home-screen .header-value { 
+    font-family: 'Teko', sans-serif; 
+    font-size: 37.8px;
+    color: var(--text-light); 
+    line-height: 1.2;
+}
+#home-screen .header-value.blinds { color: var(--primary); }
+#home-screen .settings-btn { 
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: absolute; 
+    top: 0; 
+    right: 0; 
+}
+#home-screen .settings-btn svg {
+    width: 22px;
+    height: 25px;
+}
+
+#home-screen .pot-card { 
+    text-align: center; 
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    border: none;
+    background: var(--bg-card);
+    flex-shrink: 0; 
+}
+#home-screen .pot-label { 
+    font-family: 'Teko', sans-serif; 
+    font-size: 22px; 
+    color: var(--text-medium);
+    line-height: 1;
+}
+#home-screen .pot-value { 
+    font-family: 'Teko', sans-serif; 
+    font-size: 55px; 
+    color: var(--text-light); 
+    line-height: 1;
+}
+
+#home-screen .ranking-card, #order-screen .ranking-card { flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
+
+.card-title-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 1rem;
+}
+.card-title {
+    font-family: 'Teko', sans-serif;
+    font-size: 30px;
+    color: white;
+    font-weight: 700;
+    margin: 0;
+}
+.toggle-view-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+.toggle-view-btn svg {
+    width: 19px;
+    height: 22px;
+}
+.toggle-view-btn svg path {
+    stroke: var(--text-medium);
+    stroke-opacity: 0.5;
+    stroke-width: 1.77778;
+}
+
+
+#home-screen .player-list, #order-screen .player-list { display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; flex-grow: 1; }
+#home-screen .player-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 14px; 
+}
+#home-screen .player-position { 
+    font-family: 'Teko', sans-serif; 
+    font-size: 23px; 
+    color: var(--text-medium); 
+    width: 29px; 
+    text-align: center;
+}
+#home-screen .player-info {
+    display: flex;
+    align-items: center;
+}
+#home-screen .player-stack { 
+    background-color: var(--primary); 
+    color: var(--text-dark); 
+    font-weight: 700; 
+    font-size: 12.79px;
+    font-family: 'Roboto', sans-serif;
+    padding: 8px; 
+    border-radius: 8.06px; 
+    flex-shrink: 0; 
+    cursor: pointer; 
+    border: none;
+}
+#home-screen .player-current-bet { 
+    font-size: 8px; 
+    color: var(--red); 
+    font-family: 'Roboto Mono', monospace;
+    padding: 8px;
+    line-height: 1;
+    text-align: center;
+}
+#home-screen .player-current-bet .bet-label {
+    color: var(--text-medium);
+}
+#home-screen .player-name { 
+    background-color: var(--bg-card); 
+    color: var(--text-light); 
+    padding: 8px; 
+    border-radius: 8.06px; 
+    flex-grow: 1; 
+    text-align: center; 
+    cursor: pointer; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    font-size: 12.79px;
+    font-family: 'Roboto', sans-serif;
+    border: none;
+}
+#home-screen .select-winner-btn { 
+    background-color: var(--green); 
+    color: var(--text-dark); 
+    font-size: 23px;
+    font-family: 'Roboto Mono', monospace;
+    border-radius: 8.06px; 
+    width: auto;
+    padding: 8px 12px;
+    height: auto;
+    flex-shrink: 0; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    cursor: pointer; 
+    border: none;
+}
+#home-screen .select-winner-btn.selected { 
+    background-color: var(--yellow); 
+    color: var(--text-dark); 
+    box-shadow: 0 0 10px var(--yellow);
+}
+
+#home-screen .actions { display: flex; flex-direction: column; gap: 1rem; margin-top: auto; padding-top: 1rem; flex-shrink: 0; }
+#home-screen .actions .btn { 
+    flex: 1; 
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 19.2px;
+    border-radius: 10px;
+}
+#home-screen .btn-outline {
+    background: var(--bg-card);
+    color: var(--primary);
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    border: none;
+}
+#home-screen .btn-distribute { background-color: var(--primary); color: var(--text-dark); }
+#home-screen .btn-reset-all { background-color: var(--red); color: white; }
+
+.credits-footer { text-align: center; margin-top: auto; padding-top: 1rem; color: var(--text-medium); font-size: 0.8rem; flex-shrink: 0; }
+
+/* Telas secundárias (sub-screen) */
+.sub-screen { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: var(--bg-dark); 
+    z-index: 100; 
+    display: none; /* Começa escondido */
+    flex-direction: column; 
+    padding: 1.5rem 1rem; 
+    gap: 1rem; 
+    transform: translateX(100%); 
+    transition: transform 0.3s ease-in-out; 
+}
+.sub-screen.active { 
+    display: flex; /* Mostra a tela ativa */
+    transform: translateX(0); 
+}
+
+
+.sub-screen-main-content { flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+
+.sub-screen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-shrink: 0; }
+.sub-screen-header .nav-arrow { font-size: 2rem; color: var(--text-medium); padding: 0.5rem; cursor: pointer; }
+.sub-screen-header .player-name-display { font-family: 'Teko', sans-serif; font-size: 2.5rem; display: flex; align-items: center; gap: 0.5rem; }
+.sub-screen-header .player-name-display .edit-icon { font-size: 1.5rem; vertical-align: middle; color: var(--text-medium); cursor: pointer; }
+
+.top-info-row {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+
+.bet-info-card {
+    flex: 1;
+    text-align: center;
+    background: var(--bg-card);
+    border: none;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.bet-info-card .label {
+    color: var(--text-medium);
+    font-size: 22px;
+    font-family: 'Teko', sans-serif;
+    line-height: 22px;
+}
+.bet-info-card .value {
+    color: white;
+    font-size: 55px;
+    font-family: 'Teko', sans-serif;
+    line-height: 55px;
+}
+
+#bet-screen .total-display-card,
+#manage-screen .total-display-card {
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: 10px;
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    border: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    display: flex;
+    text-align: center;
+    flex-shrink: 0;
+}
+#bet-screen .total-display-card .total-label,
+#manage-screen .total-display-card .total-label {
+    align-self: stretch;
+    color: var(--text-medium);
+    font-size: 19.2px;
+    font-family: 'Teko', sans-serif;
+    font-weight: 500;
+    line-height: 1;
+}
+#bet-screen .total-display-card .total-value,
+#manage-screen .total-display-card .total-value {
+    align-self: stretch;
+    color: white;
+    font-size: 48px;
+    font-family: 'Teko', sans-serif;
+    font-weight: 500;
+    line-height: 1;
+}
+.previous-bet-info {
+    font-size: 16px;
+    font-family: 'Teko', sans-serif;
+    color: var(--text-medium);
+    margin-top: 8px;
+    line-height: 1;
+}
+
+.chip-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 11.373px;
+    flex-shrink: 0;
+    margin-top: 1rem;
+    padding: 11.373px 28.431px;
+    background: var(--bg-overlay);
+    border-radius: 6.82px;
+}
+
+#bet-screen .chip-area,
+#manage-screen .chip-area {
+    padding: 16px 0 0 0;
+    background: none;
+    border-radius: 15px;
+    gap: 8px;
+}
+
+.chip-area-title {
+    color: white;
+    font-size: 10.83px;
+    font-family: 'Teko', sans-serif;
+    font-weight: 500;
+    text-align: center;
+}
+
+#bet-screen .chip-area-title,
+#manage-screen .chip-area-title {
+    font-size: 8px;
+    font-family: 'Roboto Mono', monospace;
+    color: var(--text-medium);
+}
+
+.chip-selector, .chip-stack-visualizer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 12.51px;
+    width: 100%;
+}
+
+#bet-chip-selector .chip-btn,
+#manage-chip-selector .chip-btn {
+    width: 56.86px;
+    height: 56.86px;
+    flex-shrink: 0;
+}
+
+.chip-btn {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: transform 0.2s ease;
+    outline-style: solid;
+    outline-width: 4.12px;
+    outline-offset: -4.12px;
+}
+.chip-btn:active {
+    transform: scale(0.95);
+}
+.chip-btn .value {
+    font-family: 'Teko', sans-serif;
+    font-size: 20.41px;
+    font-weight: 500;
+    line-height: 1;
+}
+.chip-btn .count {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 10.83px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+#bet-stack-visualizer,
+#manage-screen .chip-stack-visualizer {
+    align-self: stretch;
+    min-height: 82px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: 10px;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-end;
+}
+
+#bet-stack-visualizer .chip-btn,
+#manage-screen .chip-stack-visualizer .chip-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 30px;
+    outline-width: 6px;
+    outline-offset: -6px;
+}
+
+#bet-stack-visualizer .chip-btn .value,
+#manage-screen .chip-stack-visualizer .chip-btn .value {
+    font-size: 25.32px;
+    font-family: 'Teko', sans-serif;
+}
+
+#bet-stack-visualizer .chip-btn .count,
+#manage-screen .chip-stack-visualizer .chip-btn .count {
+    font-size: 11.43px;
+    font-family: 'Roboto Mono', monospace;
+}
+
+
+.chip-blue { 
+    background-color: var(--chip-blue-bg); 
+    color: white;
+    outline-color: var(--chip-dark-outline);
+}
+.chip-white { 
+    background-color: var(--chip-white-bg); 
+    color: var(--text-dark);
+    outline-color: var(--chip-dark-outline);
+}
+.chip-black { 
+    background-color: var(--chip-black-bg); 
+    color: white;
+    outline-color: var(--chip-light-outline);
+}
+.chip-green { 
+    background-color: var(--chip-green-bg); 
+    color: white;
+    outline-color: var(--chip-dark-outline);
+}
+.chip-red { 
+    background-color: var(--chip-red-bg); 
+    color: white;
+    outline-color: var(--chip-dark-outline);
+}
+
+.sub-screen-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; flex-shrink: 0; }
+.sub-screen-footer .footer-top-row { display: flex; width: 100%; gap: 13.72px; align-items: center; }
+
+.sub-screen-footer .prev-btn,
+.sub-screen-footer .home-btn {
+    width: 44.42px;
+    height: 36.11px;
+    padding: 2.84px;
+    background: var(--bg-overlay);
+    border-radius: 6.82px;
+    color: white;
+    font-size: 10.83px;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+.sub-screen-footer .home-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2.5;
+}
+
+.sub-screen-footer .main-action-btn {
+    flex: 1 1 0;
+    height: 36.11px;
+    padding: 2.84px;
+    background: var(--primary);
+    border-radius: 6.82px;
+    color: var(--text-dark);
+    font-size: 10.83px;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#clear-bet-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-card);
+    border-radius: 8.06px;
+    color: white;
+    font-size: 19.20px;
+    font-family: 'Teko', sans-serif;
+    font-weight: 700;
+    line-height: 1;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+}
+#clear-bet-btn:active {
+    transform: scale(0.98);
+    background-color: var(--bg-accent);
+}
+
+#end-betting-btn {
+    width: 100%;
+    height: 24.92px;
+    padding: 3.36px;
+    background: var(--bg-overlay);
+    border-radius: 8.06px;
+    border: 1.08px solid var(--primary);
+    color: white;
+    font-size: 10.83px;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 400;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+#end-betting-btn:active {
+    transform: scale(0.98);
+}
+
+#settings-screen .timer-config-card { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+#settings-screen .level-nav { display: flex; align-items: center; gap: 1rem; }
+#settings-screen .level-nav .btn { font-size: 2rem; padding: 0 1rem; }
+#settings-screen .level-display { font-size: 1.5rem; text-align: center; }
+#settings-screen .input-group { display: flex; align-items: center; gap: 0.5rem; background-color: var(--bg-accent); padding: 0.5rem 1rem; border-radius: 8px; }
+#settings-screen .input-group input { background: none; border: none; color: #FFF; font-size: 1rem; width: 50px; text-align: center; }
+#settings-screen .main-controls { display: flex; gap: 1rem; }
+#settings-screen .btn-start-pause { background-color: var(--green); color: var(--text-dark); }
+#settings-screen .btn-start-pause.paused { background-color: var(--primary); }
+#settings-screen .btn-reset-timer { background-color: var(--red); color: white; }
+
+#order-screen .player-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background-color: var(--bg-accent);
+    padding: 8px;
+    border-radius: 8px;
+}
+#order-screen .drag-handle {
+    cursor: grab;
+    color: var(--text-medium);
+    font-family: 'Teko', sans-serif;
+    font-size: 23px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+#order-screen .player-name-order {
+    flex-grow: 1;
+    color: white;
+    font-size: 13px;
+    font-family: 'Roboto', sans-serif;
+}
+#order-screen .player-item.dragging {
+    opacity: 0.5;
+}
+#order-screen .add-player-btn {
+    width: 100%;
+    margin-top: 1rem;
+    background-color: var(--green);
+    color: var(--text-dark);
+    font-size: 23px;
+}
+.remove-player-btn {
+    background: none;
+    border: none;
+    color: var(--red);
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0 0.5rem;
+}
+
+/* --- AJUSTES PARA TELAS MENORES (MOBILE) --- */
+@media (max-width: 640px) {
+    .screen { padding: 1rem 0.75rem; gap: 0.75rem; }
+    .btn { font-size: 1.2rem; padding: 0.6rem; }
+    #home-screen .header-value { font-size: 1.8rem; }
+    #home-screen .header-label { font-size: 0.8rem; }
+    #home-screen .pot-value { font-size: 2.8rem; }
+    #home-screen .pot-label { font-size: 1.2rem; }
+    #home-screen .ranking-card .card-title { font-size: 1.5rem; margin-bottom: 0.5rem;}
+    #home-screen .player-list { gap: 0.5rem; }
+    #home-screen .player-stack { padding: 0.4rem; font-size: 1rem; }
+    #home-screen .player-name { padding: 0.4rem; font-size: 1rem; }
+    #home-screen .player-position { font-size: 1.2rem; }
+    .sub-screen-header .player-name-display { font-size: 1.8rem; }
+    .sub-screen-header .player-name-display .edit-icon { font-size: 1.2rem; }
+    .sub-screen-header .nav-arrow { font-size: 1.8rem; }
+    .total-display-card .total-value { font-size: 3rem; }
+    .total-display-card .total-label { font-size: 1.2rem; }
+    
+    #bet-chip-selector .chip-btn,
+    #manage-chip-selector .chip-btn {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .chip-btn .value { font-size: 1.5rem; }
+    .chip-btn .count { font-size: 0.7rem; }
+    .chip-stack-visualizer { min-height: 80px; }
+    .chip-stack-visualizer .chip-btn { width: 60px; height: 60px; }
+    .chip-stack-visualizer .chip-btn .value { font-size: 1.5rem; }
 }
