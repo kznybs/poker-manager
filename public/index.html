@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Poker Multiplayer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Poker Multiplayer</h1>
+  <div id="mesa">
+    <p id="mensagens"></p>
+    <input id="entrada" placeholder="Digite sua jogada..." />
+    <button onclick="enviar()">Enviar</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
