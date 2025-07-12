@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- STATE ---
     let gameState = {};
-    let myPlayerId = null;
+    let myPlayerId = sessionStorage.getItem('pokerPlayerId') ? parseInt(sessionStorage.getItem('pokerPlayerId')) : null;
     let currentBet = {}; // Aposta não confirmada, gerenciada localmente neste cliente
 
     // --- DOM ELEMENTS ---
@@ -30,19 +30,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!betObject) return 0;
         return Object.entries(betObject).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
     };
+    
+    const switchView = (view) => {
+        if (view === 'bet') {
+            selectionScreen.classList.remove('active');
+            betScreen.classList.add('active');
+        } else {
+            myPlayerId = null;
+            sessionStorage.removeItem('pokerPlayerId');
+            selectionScreen.classList.add('active');
+            betScreen.classList.remove('active');
+        }
+    };
 
     // --- RENDER FUNCTIONS ---
     function renderPlayerSelection() {
         if (!gameState.players || gameState.players.length === 0) {
-            playerSelectionList.innerHTML = '<p>Aguardando o manager adicionar jogadores...</p>';
+            playerSelectionList.innerHTML = '<p class="loading-text">Aguardando o manager adicionar jogadores...</p>';
             return;
         }
         playerSelectionList.innerHTML = '';
         gameState.players.forEach(player => {
             const playerButton = document.createElement('button');
-            playerButton.className = 'btn';
-            playerButton.style.width = '100%';
-            playerButton.style.marginBottom = '1rem';
+            // Usando as classes do manager para um visual consistente
+            playerButton.className = 'player-name-order-btn'; 
             playerButton.dataset.playerId = player.id;
             playerButton.textContent = player.name;
             playerSelectionList.appendChild(playerButton);
@@ -53,9 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!myPlayerId || !gameState.players) return;
         const me = gameState.players.find(p => p.id === myPlayerId);
         if (!me) {
-            myPlayerId = null;
-            selectionScreen.classList.add('active');
-            betScreen.classList.remove('active');
+            // Se meu jogador não existe mais (foi removido pelo manager)
+            switchView('selection');
             renderPlayerSelection();
             return;
         }
@@ -107,13 +117,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENT LISTENERS ---
     playerSelectionList.addEventListener('click', e => {
-        if (e.target.closest('.btn')) {
-            myPlayerId = parseInt(e.target.closest('.btn').dataset.playerId);
+        const target = e.target.closest('.player-name-order-btn');
+        if (target) {
+            myPlayerId = parseInt(target.dataset.playerId);
+            sessionStorage.setItem('pokerPlayerId', myPlayerId); // Salva o ID na sessão
             currentBet = {};
-            selectionScreen.classList.remove('active');
-            betScreen.classList.add('active');
+            switchView('bet');
             renderBetView();
         }
+    });
+    
+    document.getElementById('change-player-btn').addEventListener('click', () => {
+        switchView('selection');
     });
 
     document.getElementById('player-view-chip-selector').addEventListener('click', e => {
@@ -161,9 +176,19 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('gameStateUpdate', (newState) => {
         gameState = newState;
         if (myPlayerId) {
+            switchView('bet');
             renderBetView();
         } else {
+            switchView('selection');
             renderPlayerSelection();
         }
     });
+    
+    // --- INIT ---
+    if (myPlayerId) {
+        socket.on('connect', () => {
+             // Se reconectar, o estado será recebido pelo 'gameStateUpdate'
+             console.log('Reconectado ao servidor.');
+        });
+    }
 });
