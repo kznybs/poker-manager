@@ -10,56 +10,58 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="player-view" class="screen active">
-        <!-- Tela de Seleção de Jogador -->
-        <div id="player-selection-screen" class="sub-screen active">
-            <header class="sub-screen-header">
-                <div class="player-name-display">QUEM É VOCÊ?</div>
-            </header>
-            <div class="card ranking-card">
-                <div id="player-selection-list" class="player-list" style="padding: 1rem;">
-                    <p>Aguardando o manager iniciar o jogo...</p>
-                </div>
+    <!-- Tela de Seleção de Jogador -->
+    <div id="player-selection-screen" class="sub-screen active">
+        <header class="sub-screen-header">
+            <div class="player-name-display">QUEM É VOCÊ?</div>
+        </header>
+        <div class="card ranking-card">
+            <div id="player-selection-list" class="player-list" style="padding: 1rem;">
+                <p class="loading-text">Aguardando o manager iniciar o jogo...</p>
             </div>
         </div>
+        <footer class="credits-footer">
+            <p>Abra esta página no seu celular para apostar.</p>
+        </footer>
+    </div>
 
-        <!-- Tela de Aposta do Jogador -->
-        <div id="player-bet-screen" class="sub-screen">
-            <header class="sub-screen-header">
-                <div id="player-view-name" class="player-name-display">JOGADOR</div>
-            </header>
-            <div class="sub-screen-main-content">
-                 <div class="top-info-row">
-                    <div class="card bet-info-card">
-                        <div class="label">Meu Stack</div>
-                        <div id="player-view-stack" class="value">0</div>
-                    </div>
-                    <div class="card bet-info-card">
-                        <div class="label">Aposta na Rodada</div>
-                        <div id="player-view-round-bet" class="value">0</div>
-                    </div>
+    <!-- Tela de Aposta do Jogador -->
+    <div id="player-bet-screen" class="sub-screen">
+        <header class="sub-screen-header">
+            <div id="player-view-name" class="player-name-display">JOGADOR</div>
+            <button id="change-player-btn" class="btn" style="font-size: 1rem; padding: 0.5rem 1rem;">Trocar</button>
+        </header>
+        <div class="sub-screen-main-content">
+             <div class="top-info-row">
+                <div class="card bet-info-card">
+                    <div class="label">Meu Stack</div>
+                    <div id="player-view-stack" class="value">0</div>
                 </div>
-                <div class="card total-display-card">
-                    <div class="total-label">Sua Nova Aposta</div>
-                    <div id="player-view-bet-total-value" class="total-value">0</div>
-                     <div id="player-view-previous-bet-info" class="previous-bet-info"></div>
-                </div>
-                <div class="chip-area" id="player-view-remove-area">
-                    <div class="chip-area-title">Remover da Aposta</div>
-                    <div id="player-view-bet-visualizer" class="chip-stack-visualizer"></div>
-                    <button id="player-view-clear-bet-btn" class="btn" style="background-color: var(--bg-accent); color: white; width: 100%; margin-top: 1rem;">Limpar Aposta</button>
-                </div>
-                <div class="chip-area">
-                    <div class="chip-area-title">Apostar do Stack</div>
-                    <div id="player-view-chip-selector" class="chip-selector"></div>
+                <div class="card bet-info-card">
+                    <div class="label">Aposta na Rodada</div>
+                    <div id="player-view-round-bet" class="value">0</div>
                 </div>
             </div>
-            <footer class="sub-screen-footer">
-                <div class="footer-top-row">
-                    <button id="player-view-confirm-btn" class="btn main-action-btn" style="flex-grow: 1; background-color: var(--green); color: var(--text-dark);">Confirmar Aposta</button>
-                </div>
-            </footer>
+            <div class="card total-display-card">
+                <div class="total-label">Sua Nova Aposta</div>
+                <div id="player-view-bet-total-value" class="total-value">0</div>
+                 <div id="player-view-previous-bet-info" class="previous-bet-info"></div>
+            </div>
+            <div class="chip-area" id="player-view-remove-area">
+                <div class="chip-area-title">Remover da Aposta</div>
+                <div id="player-view-bet-visualizer" class="chip-stack-visualizer"></div>
+                <button id="player-view-clear-bet-btn" class="btn" style="background-color: var(--bg-accent); color: white; width: 100%; margin-top: 1rem;">Limpar</button>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Apostar do Stack</div>
+                <div id="player-view-chip-selector" class="chip-selector"></div>
+            </div>
         </div>
+        <footer class="sub-screen-footer">
+            <div class="footer-top-row">
+                <button id="player-view-confirm-btn" class="btn main-action-btn" style="flex-grow: 1; background-color: var(--green); color: var(--text-dark);">Confirmar Aposta</button>
+            </div>
+        </footer>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
