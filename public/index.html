@@ -1,19 +1,203 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Poker Multiplayer</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>PokerMaster Manager</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Teko:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Poker Multiplayer</h1>
-  <div id="mesa">
-    <p id="mensagens"></p>
-    <input id="entrada" placeholder="Digite sua jogada..." />
-    <button onclick="enviar()">Enviar</button>
-  </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js"></script>
+    <!-- Conteúdo HTML original colado aqui -->
+    <!-- Tela Home -->
+    <div id="home-screen" class="screen active">
+        <header class="header">
+            <div class="header-block">
+                <div class="header-label">BLINDS</div>
+                <div id="home-blinds-display" class="header-value blinds">25/50</div>
+            </div>
+            <div class="header-block">
+                <div class="header-label">RODADA</div>
+                <div id="home-round-num" class="header-value">1</div>
+            </div>
+            <div class="header-block">
+                <div class="header-label">TEMPO</div>
+                <div id="home-timer-display" class="header-value">15:00</div>
+            </div>
+            <button id="settings-btn" class="settings-btn">
+                <svg width="22" height="25" viewBox="0 0 22 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.30181 0.0858318C8.24459 0.143053 8.21598 0.472075 8.21598 1.08005C8.21598 2.20302 8.22313 2.21732 9.13152 2.21732H9.72519L9.68227 3.32598L9.26742 3.37605C8.10869 3.5191 6.6424 4.02694 5.53374 4.65637C2.61545 6.31579 0.691393 9.06956 0.119181 12.3955C-0.0667879 13.5114 -0.0310247 15.3138 0.19786 16.3653C0.92743 19.6841 3.04461 22.4092 6.06303 23.9256C6.76399 24.2761 8.09438 24.7124 8.93124 24.8698C9.95407 25.0557 12.0069 25.0414 12.9796 24.834C17.3285 23.9042 20.5829 20.6855 21.5271 16.3653C21.7345 15.3997 21.7846 13.6544 21.6343 12.603C20.9405 7.91083 17.3642 4.21291 12.7579 3.43327L12.0426 3.31168L11.9997 2.21732H12.6292C13.5232 2.21017 13.5089 2.22447 13.5089 1.09436C13.5089 0.472075 13.4803 0.143053 13.4231 0.0858318C13.3587 0.0214579 12.6935 0 10.8625 0C9.03138 0 8.36618 0.0214579 8.30181 0.0858318ZM12.5648 5.26435C15.3186 5.82226 17.636 7.5532 18.8949 9.99225C19.5672 11.3012 19.882 12.6101 19.882 14.1265C19.882 16.0291 19.3884 17.6527 18.3227 19.2621C17.8721 19.9416 16.6919 21.1218 15.9909 21.5938C13.2514 23.4321 9.83963 23.6967 6.93565 22.2805C5.92713 21.787 5.32631 21.3578 4.4966 20.5281C3.11614 19.1548 2.32935 17.6527 1.96456 15.7358C1.82866 15.0349 1.80721 13.497 1.9145 12.8032C2.55823 8.79776 5.62672 5.77219 9.64651 5.18567C10.4548 5.06407 11.7637 5.09984 12.5648 5.26435Z" fill="white"/>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M9.11159 7.21765C9.13305 6.4094 9.14736 6.34503 9.30472 6.21628C9.45492 6.09469 9.59797 6.08038 10.8425 6.08038V11.0985C10.5976 11.0956 10.3539 11.1173 10.1559 11.1659C9.34763 11.3519 8.46786 12.0815 8.11022 12.8539C7.94571 13.2187 7.92425 13.3618 7.9171 14.0556C7.9171 14.8066 7.93141 14.8638 8.15314 15.3288C8.65382 16.3373 9.55506 16.9524 10.6351 17.0096C11.5611 17.0605 12.335 16.7748 12.9132 16.1835L16.4502 19.7205C15.7493 20.4071 15.3702 20.7433 15.2629 20.7433C15.1627 20.7433 14.9052 20.5502 14.5834 20.2355L14.5574 20.2102C14.2869 19.9466 14.0163 19.6829 13.9539 19.6275C13.861 19.5417 13.7966 19.5488 13.4747 19.7062C13.2744 19.7992 12.9812 19.9208 12.8167 19.9708L12.5306 20.0638V20.9364C12.5306 21.4387 12.5494 21.7112 12.4227 21.8587C12.2572 22.0514 11.8431 22.0308 10.8139 22.0308C10.0486 22.0308 9.3834 22.0022 9.33333 21.9736C9.16882 21.8663 9.09729 21.5086 9.09729 20.7719C9.09729 20.2283 9.07583 20.028 9.01146 20.028C8.96139 20.028 8.66098 19.9136 8.34626 19.7777L7.77405 19.5274L7.15892 20.1425C6.63678 20.6575 6.50803 20.7576 6.36498 20.7219C6.14325 20.6646 4.16196 18.6619 4.16196 18.4831C4.16196 18.4115 4.43376 18.0754 4.76994 17.7392L5.37791 17.1312L5.12757 16.559C4.99167 16.2443 4.87723 15.951 4.87723 15.9081C4.87723 15.7722 4.66265 15.7293 3.98314 15.7365C3.98156 15.7365 3.97998 15.7365 3.97841 15.7365C3.27803 15.7478 3.14257 15.75 3.05573 15.6861C3.0332 15.6695 3.01394 15.6485 2.98893 15.622C2.81726 15.4504 2.81726 12.6966 2.99608 12.5035C3.09622 12.389 3.23212 12.3747 3.99745 12.3747C4.70556 12.3747 4.87723 12.3533 4.87723 12.2746C4.87723 12.2174 4.98452 11.9169 5.12042 11.6022L5.36361 11.0372L4.76278 10.422C4.36939 10.0215 4.16196 9.74969 4.16196 9.64955C4.16196 9.53511 4.47668 9.17033 5.18479 8.45506C6.0145 7.62535 6.25054 7.41793 6.41505 7.41793C6.56525 7.41793 6.74407 7.56098 7.20184 8.0116L7.80266 8.60527L8.28904 8.39069C8.55369 8.26909 8.84695 8.1475 8.93278 8.12604C9.07583 8.08313 9.09014 8.0259 9.11159 7.21765Z" fill="white"/>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12.1378 11.3996L12.9085 10.8895C13.933 10.2111 14.7929 9.65608 14.8169 9.65608C14.978 9.65608 15.1287 9.83424 15.0842 9.97471C15.0739 10.0124 14.5154 10.8689 13.8507 11.8762L13.3958 12.5638L12.6379 13.7093V13.9183C12.6379 14.7405 12.0383 15.46 11.216 15.6348C10.9145 15.6964 10.798 15.6964 10.4965 15.6348C9.58514 15.4429 8.96842 14.5658 9.10205 13.651C9.23224 12.7705 9.96887 12.1229 10.8494 12.1229H11.0447L12.1378 11.3996ZM11.1338 13.5893C11.2194 13.6681 11.2468 13.7195 11.2571 13.8566C11.2742 14.0142 11.264 14.0416 11.1646 14.1547C11.0961 14.2369 11.0139 14.2883 10.9351 14.302C10.5993 14.3637 10.3252 13.9662 10.5102 13.6853C10.6541 13.4694 10.9488 13.4249 11.1338 13.5893Z" fill="white"/>
+                </svg>
+            </button>
+        </header>
+
+        <div class="card pot-card">
+            <div class="pot-label">Total no Pote</div>
+            <div id="home-pot-value" class="pot-value">0</div>
+        </div>
+        <div class="card ranking-card">
+            <div class="card-title-container">
+                <h2 class="card-title">RANKING</h2>
+                <button id="go-to-order-btn" class="toggle-view-btn">
+                    <svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13.9444 1L17.5 4.55556M17.5 4.55556L13.9444 8.11111M17.5 4.55556H5.05556C4.11256 4.55556 3.20819 4.93016 2.5414 5.59695C1.8746 6.26375 1.5 7.16812 1.5 8.11111V9.88889M5.05556 20.5556L1.5 17M1.5 17L5.05556 13.4444M1.5 17H13.9444C14.8874 17 15.7918 16.6254 16.4586 15.9586C17.1254 15.2918 17.5 14.3874 17.5 13.4444V11.6667" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="player-list" class="player-list"></div>
+        </div>
+        <div class="actions">
+            <button id="end-betting-btn-home" class="btn btn-outline">Finalizar Apostas</button>
+            <button id="distribute-btn" class="btn btn-distribute">Distribuir</button>
+            <button id="reset-btn" class="btn btn-reset-all">Resetar Fichas de Todos</button>
+        </div>
+    </div>
+
+    <!-- Tela de Ordem de Jogo -->
+    <div id="order-screen" class="screen">
+        <div class="card ranking-card">
+             <div class="card-title-container">
+                <h2 class="card-title">ORDEM DE JOGO</h2>
+                <button id="go-to-home-btn" class="toggle-view-btn">
+                     <svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13.9444 1L17.5 4.55556M17.5 4.55556L13.9444 8.11111M17.5 4.55556H5.05556C4.11256 4.55556 3.20819 4.93016 2.5414 5.59695C1.8746 6.26375 1.5 7.16812 1.5 8.11111V9.88889M5.05556 20.5556L1.5 17M1.5 17L5.05556 13.4444M1.5 17H13.9444C14.8874 17 15.7918 16.6254 16.4586 15.9586C17.1254 15.2918 17.5 14.3874 17.5 13.4444V11.6667" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="order-player-list" class="player-list">
+                <!-- Player items will be dynamically inserted here -->
+            </div>
+            <button id="add-player-btn" class="btn add-player-btn">+</button>
+        </div>
+        <div class="actions">
+            <button id="save-order-btn" class="btn btn-distribute">Salvar Ordem</button>
+        </div>
+    </div>
+
+    <!-- Tela de Aposta -->
+    <div id="bet-screen" class="screen">
+        <header class="sub-screen-header">
+            <div id="bet-prev-player" class="nav-arrow">&lt;</div>
+            <div id="bet-player-name" class="player-name-display">JOGADOR 1</div>
+            <div id="bet-next-player" class="nav-arrow">&gt;</div>
+        </header>
+        <div class="sub-screen-main-content">
+            <div class="top-info-row">
+                <div class="card bet-info-card">
+                    <div class="label">Pote</div>
+                    <div id="bet-screen-pot-value" class="value">0</div>
+                </div>
+                <div class="card bet-info-card">
+                    <div class="label">Rodada</div>
+                    <div id="bet-screen-round-num" class="value">0</div>
+                </div>
+            </div>
+            <div class="card total-display-card">
+                <div class="total-label">Apostado</div>
+                <div id="bet-total-value" class="total-value">0</div>
+                <div id="previous-bet-info" class="previous-bet-info"></div>
+            </div>
+            <div class="chip-area" id="bet-remove-area">
+                <div class="chip-area-title">Remover</div>
+                <div id="bet-stack-visualizer" class="chip-stack-visualizer"></div>
+                <button id="clear-bet-btn">Limpar</button>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Apostar</div>
+                <div id="bet-chip-selector" class="chip-selector"></div>
+            </div>
+        </div>
+        <footer class="sub-screen-footer">
+            <div class="footer-top-row">
+                <button class="btn prev-btn" data-target="bet">&lt;<br>Ant.</button>
+                <button class="btn home-btn">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9.5L12 4L21 9.5V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9.5Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 22V12H15V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
+            </div>
+            <button id="end-betting-btn">Finalizar Apostas</button>
+        </footer>
+    </div>
+
+    <!-- Tela de Gerenciamento -->
+    <div id="manage-screen" class="screen">
+        <header class="sub-screen-header">
+            <div id="manage-prev-player" class="nav-arrow">&lt;</div>
+            <div id="manage-player-name" class="player-name-display">JOGADOR 1 <span class="edit-icon">✎</span></div>
+            <div id="manage-next-player" class="nav-arrow">&gt;</div>
+        </header>
+        <div class="sub-screen-main-content">
+            <div class="card total-display-card">
+                <div class="total-label">Stack Total</div>
+                <div id="manage-total-value" class="total-value">2400</div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Remover do Stack</div>
+                <div id="manage-stack-visualizer" class="chip-stack-visualizer"></div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Adicionar ao Stack</div>
+                <div id="manage-chip-selector" class="chip-selector"></div>
+            </div>
+        </div>
+        <footer class="sub-screen-footer">
+             <div class="footer-top-row">
+                <button class="btn prev-btn" data-target="manage">&lt;<br>Ant.</button>
+                <button class="btn home-btn">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9.5L12 4L21 9.5V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9.5Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 22V12H15V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button id="manage-save-btn" class="btn main-action-btn">Salvar</button>
+             </div>
+        </footer>
+    </div>
+    
+    <!-- Tela de Configurações do Timer -->
+    <div id="settings-screen" class="screen">
+        <header class="sub-screen-header">
+            <div class="nav-arrow" style="visibility: hidden;">&lt;</div>
+            <div class="player-name-display">TIMER</div>
+            <div class="nav-arrow home-btn" style="font-size: 1.5rem;">✖</div>
+        </header>
+        <div class="card timer-config-card">
+            <div class="level-nav">
+                <button id="timer-prev-level-btn" class="btn">&lt;</button>
+                <div class="level-display">
+                    <div class="header-label">RODADA <span id="settings-round-num">1</span></div>
+                    <div id="settings-blinds-display" class="header-value blinds">25/50</div>
+                </div>
+                <button id="timer-next-level-btn" class="btn">&gt;</button>
+            </div>
+            <div class="input-group">
+                <label for="timer-input">Duração (min):</label>
+                <input type="number" id="timer-input" value="15">
+            </div>
+            <div class="main-controls">
+                <button id="timer-start-pause-btn" class="btn btn-start-pause paused">INICIAR</button>
+                <button id="timer-reset-btn" class="btn btn-reset-timer">RESETAR</button>
+            </div>
+        </div>
+        <footer class="credits-footer">
+            <p>Desenvolvido por Gabriel, Vinicius e Adilson @ 2025</p>
+        </footer>
+    </div>
+
+    <!-- Scripts do Cliente -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
