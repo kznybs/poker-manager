@@ -16,16 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
         { small: 500, big: 1000 }, { small: 600, big: 1200 }, { small: 800, big: 1600 },
         { small: 1000, big: 2000 }
     ];
-    const INITIAL_CHIPS = { white: 8, red: 8, green: 8, black: 8, blue: 0 };
-
 
     // --- ESTADO DO JOGO (Agora é um espelho do estado do servidor) ---
     let state = {};
-    let localUiState = { // Estado que só existe neste cliente
+    // O estado da UI local armazena coisas que não precisam ser sincronizadas,
+    // como qual tela está ativa ou qual jogador está sendo editado no momento.
+    let localUiState = {
         activeScreen: 'home',
         activePlayerId: null,
-        currentBet: {},
-        manageChips: {}
+        currentBet: {}, // Aposta não confirmada para a tela de aposta do manager
+        manageChips: {} // Fichas não confirmadas para a tela de gerenciamento do manager
     };
     let audioCtx;
 
@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // --- FUNÇÕES DE COMUNICAÇÃO COM O SERVIDOR ---
-    function sendStateUpdate() {
-        socket.emit('playerAction', { type: 'updateGameState', payload: state });
+    function sendPlayerAction(type, payload = {}) {
+        socket.emit('playerAction', { type, payload });
     }
 
     function sendTimerAction(type, payload = null) {
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LÓGICA DE CÁLCULO (semelhante ao original) ---
+    // --- LÓGICA DE CÁLCULO ---
     function calculateStack(player) {
         if (!player || !player.chips) return 0;
         return Object.entries(player.chips).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
@@ -92,7 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function switchScreen(screenName) {
         localUiState.activeScreen = screenName;
         Object.keys(screens).forEach(key => {
-            screens[key].classList.toggle('active', key === screenName);
+            // Usa 'sub-screen' para a transição, mas 'screen' para a lógica geral
+            const element = screens[key];
+            if (element.classList.contains('sub-screen')) {
+                 element.classList.toggle('active', key === screenName);
+            } else {
+                 element.style.display = (key === screenName) ? 'flex' : 'none';
+            }
         });
     }
     
@@ -129,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderOrderScreen() {
+        if (!state.players) return;
         const playerListEl = document.getElementById('order-player-list');
         playerListEl.innerHTML = '';
         state.players.forEach(player => {
@@ -147,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderBetScreen(playerId) {
         localUiState.activePlayerId = playerId;
-        localUiState.currentBet = {};
+        localUiState.currentBet = {}; // Limpa aposta local ao trocar de jogador
 
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
@@ -181,7 +188,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const visualizerEl = document.getElementById('bet-stack-visualizer');
         visualizerEl.innerHTML = '';
         
-        const chipsToVisualize = {...player.roundBet, ...localUiState.currentBet};
+        // Combina as fichas já apostadas na rodada com a nova aposta local
+        const chipsToVisualize = {...player.roundBet};
+        Object.entries(localUiState.currentBet).forEach(([type, count]) => {
+            chipsToVisualize[type] = (chipsToVisualize[type] || 0) + count;
+        });
+
         Object.entries(chipsToVisualize).forEach(([type, count]) => {
             if (count > 0) {
                 const config = CHIP_TYPES[type];
@@ -195,9 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const selectorEl = document.getElementById('bet-chip-selector');
         selectorEl.innerHTML = '';
-        Object.entries(CHIP_TYPES).forEach(([type, config]) => {
-            const chipsTakenFromHand = Math.max(0, localUiState.currentBet[type] || 0);
-            const remainingInHand = player.chips[type] - chipsTakenFromHand;
+        Object.entries(player.chips).forEach(([type, count]) => {
+            const chipsInBet = localUiState.currentBet[type] || 0;
+            const remainingInHand = count - chipsInBet;
             
             if (remainingInHand > 0) {
                  const chipBtn = document.createElement('button');
@@ -211,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function renderManageScreen(playerId) {
         localUiState.activePlayerId = playerId;
-        localUiState.manageChips = {};
+        localUiState.manageChips = {}; // Limpa ao trocar de jogador
 
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
@@ -262,14 +274,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getNextPlayerId(currentId) {
         const currentIndex = state.players.findIndex(p => p.id === currentId);
-        if (currentIndex === -1) return null;
+        if (currentIndex === -1 || state.players.length === 0) return null;
         const nextIndex = (currentIndex + 1) % state.players.length;
         return state.players[nextIndex].id;
     }
 
     function getPrevPlayerId(currentId) {
         const currentIndex = state.players.findIndex(p => p.id === currentId);
-        if (currentIndex === -1) return null;
+        if (currentIndex === -1 || state.players.length === 0) return null;
         const prevIndex = (currentIndex - 1 + state.players.length) % state.players.length;
         return state.players[prevIndex].id;
     }
@@ -320,12 +332,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('dragover', e => {
         e.preventDefault();
         const list = document.getElementById('order-player-list');
-        if (!list) return;
+        if (!list || !draggedItem) return;
         const afterElement = getDragAfterElement(list, e.clientY);
-        const currentDragged = document.querySelector('.dragging');
-        if(currentDragged){
-            if (afterElement == null) list.appendChild(currentDragged);
-            else list.insertBefore(currentDragged, afterElement);
+        if (afterElement == null) {
+            list.appendChild(draggedItem);
+        } else {
+            list.insertBefore(draggedItem, afterElement);
         }
     });
 
@@ -339,207 +351,135 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    function handleEndBetting() {
-        state.players.forEach(player => {
-            Object.entries(player.roundBet).forEach(([type, count]) => {
-                state.pot[type] = (state.pot[type] || 0) + count;
-            });
-            player.roundBet = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
-        });
-        sendStateUpdate();
-        switchScreen('home');
-    }
-
     document.body.addEventListener('click', (e) => {
-        const target = e.target;
+        const target = e.target.closest('button');
+        if (!target) return;
         
-        // Navegação Home
-        if (target.closest('.player-stack')) { renderBetScreen(parseInt(target.closest('.player-stack').dataset.playerId)); return; }
-        if (target.closest('.player-name')) { renderManageScreen(parseInt(target.closest('.player-name').dataset.playerId)); return; }
-        if (target.closest('.select-winner-btn')) {
-            const player = state.players.find(p => p.id === parseInt(target.closest('.select-winner-btn').dataset.playerId));
-            player.selectedForPot = !player.selectedForPot;
-            sendStateUpdate();
+        // Ações que enviam eventos para o servidor
+        if (target.matches('.select-winner-btn')) {
+            sendPlayerAction('toggleWinner', { playerId: parseInt(target.dataset.playerId) });
             return;
         }
-        if (target.closest('#distribute-btn')) {
-            const winners = state.players.filter(p => p.selectedForPot);
-            if (winners.length > 0 && calculatePotValue() > 0) {
-                if (winners.length === 1) {
-                    const winner = winners[0];
-                    Object.keys(state.pot).forEach(chipType => {
-                        winner.chips[chipType] = (winner.chips[chipType] || 0) + state.pot[chipType];
-                    });
-                } else {
-                    const totalPotValue = calculatePotValue();
-                    const valuePerWinner = Math.floor(totalPotValue / winners.length);
-                    winners.forEach(winner => {
-                        let valueToDistribute = valuePerWinner;
-                        const sortedChipTypes = Object.keys(CHIP_TYPES).sort((a, b) => CHIP_TYPES[b].value - CHIP_TYPES[a].value);
-                        sortedChipTypes.forEach(type => {
-                            const chipValue = CHIP_TYPES[type].value;
-                            if (valueToDistribute >= chipValue) {
-                                const numChips = Math.floor(valueToDistribute / chipValue);
-                                winner.chips[type] = (winner.chips[type] || 0) + numChips;
-                                valueToDistribute -= numChips * chipValue;
-                            }
-                        });
-                    });
-                }
-                state.pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
-                state.players.forEach(p => p.selectedForPot = false);
-                sendStateUpdate();
-            }
+        if (target.matches('#distribute-btn')) {
+            sendPlayerAction('distributePot');
             return;
         }
-        if (target.closest('#reset-btn')) {
-            if (confirm('Tem certeza que deseja limpar todos os jogadores e reiniciar o jogo?')) {
-                state.players = [];
-                state.pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
-                sendStateUpdate();
+        if (target.matches('#reset-btn')) {
+            if (confirm('Tem certeza que deseja resetar o jogo? Isso removerá todos os jogadores e zerará o pote.')) {
+                sendPlayerAction('resetGame');
                 sendTimerAction('reset');
             }
             return;
         }
-        if (target.closest('#settings-btn')) { switchScreen('settings'); return; }
-        if (target.closest('#go-to-order-btn')) { renderOrderScreen(); switchScreen('order'); return; }
-        if (target.closest('#go-to-home-btn')) { switchScreen('home'); return; }
-
-        // Tela de Ordem de Jogo
-        if (target.closest('#add-player-btn')) {
+        if (target.matches('#add-player-btn')) {
             const newName = prompt("Digite o nome do novo jogador:");
-            if (newName && newName.trim() !== "") {
-                const newId = state.players.length > 0 ? Math.max(...state.players.map(p => p.id)) + 1 : 1;
-                state.players.push({
-                    id: newId,
-                    name: newName,
-                    chips: { ...INITIAL_CHIPS },
-                    roundBet: { white: 0, red: 0, green: 0, black: 0, blue: 0 },
-                    selectedForPot: false
-                });
-                renderOrderScreen();
-                sendStateUpdate();
-            }
+            if (newName) sendPlayerAction('addPlayer', { name: newName });
             return;
         }
-        if (target.closest('.remove-player-btn')) {
-            const playerId = parseInt(target.closest('.remove-player-btn').dataset.playerId);
-            const playerIndex = state.players.findIndex(p => p.id === playerId);
-            if (playerIndex > -1) {
-                state.players.splice(playerIndex, 1);
-                renderOrderScreen();
-                sendStateUpdate();
-            }
+        if (target.matches('.remove-player-btn')) {
+            sendPlayerAction('removePlayer', { playerId: parseInt(target.dataset.playerId) });
             return;
         }
-        if (target.closest('#save-order-btn')) {
+        if (target.matches('#save-order-btn')) {
             const playerNodes = document.querySelectorAll('#order-player-list .player-item');
-            const newOrder = Array.from(playerNodes).map(node => {
-                const playerId = parseInt(node.dataset.playerId);
-                return state.players.find(p => p.id === playerId);
-            });
-            state.players = newOrder;
-            sendStateUpdate();
+            const playerIds = Array.from(playerNodes).map(node => parseInt(node.dataset.playerId));
+            sendPlayerAction('updateOrder', { playerIds });
             switchScreen('home');
             return;
         }
-
-        // Tela de Aposta
-        if (target.closest('#bet-chip-selector .chip-btn')) {
-            const type = target.closest('.chip-btn').dataset.chipType;
+        if (target.matches('#end-betting-btn') || target.matches('#end-betting-btn-home')) {
+            sendPlayerAction('endBettingRound');
+            switchScreen('home');
+            return;
+        }
+        if (target.matches('#manage-save-btn')) {
             const player = state.players.find(p => p.id === localUiState.activePlayerId);
-            const betCount = localUiState.currentBet[type] || 0;
-            if (player.chips[type] > betCount) { 
-                localUiState.currentBet[type] = (localUiState.currentBet[type] || 0) + 1;
+            if (!player) return;
+            const finalChips = { ...player.chips };
+            Object.entries(localUiState.manageChips).forEach(([type, count]) => {
+                finalChips[type] = Math.max(0, (finalChips[type] || 0) + count);
+            });
+            sendPlayerAction('updatePlayerChips', { playerId: player.id, chips: finalChips });
+            switchScreen('home');
+            return;
+        }
+        if (target.matches('.edit-icon')) {
+            const player = state.players.find(p => p.id === localUiState.activePlayerId);
+            if (!player) return;
+            const newName = prompt('Digite o novo nome:', player.name);
+            if (newName) sendPlayerAction('updatePlayerName', { playerId: player.id, name: newName });
+            return;
+        }
+        if (target.matches('#bet-confirm-btn')) {
+            sendPlayerAction('playerBet', { playerId: localUiState.activePlayerId, bet: localUiState.currentBet });
+            const nextPlayerId = getNextPlayerId(localUiState.activePlayerId);
+            if (nextPlayerId) renderBetScreen(nextPlayerId);
+            else switchScreen('home');
+            return;
+        }
+
+
+        // Ações da UI local (não precisam do servidor)
+        if (target.matches('.player-stack')) { renderBetScreen(parseInt(target.dataset.playerId)); return; }
+        if (target.matches('.player-name')) { renderManageScreen(parseInt(target.dataset.playerId)); return; }
+        if (target.matches('#settings-btn')) { switchScreen('settings'); return; }
+        if (target.matches('#go-to-order-btn')) { renderOrderScreen(); switchScreen('order'); return; }
+        if (target.matches('#go-to-home-btn') || target.matches('.home-btn')) { switchScreen('home'); return; }
+
+        // Navegação entre jogadores nas telas de aposta/gerenciamento
+        if (target.matches('#bet-next-player')) { renderBetScreen(getNextPlayerId(localUiState.activePlayerId)); return; }
+        if (target.matches('#bet-prev-player')) { renderBetScreen(getPrevPlayerId(localUiState.activePlayerId)); return; }
+        if (target.matches('#manage-next-player')) { renderManageScreen(getNextPlayerId(localUiState.activePlayerId)); return; }
+        if (target.matches('#manage-prev-player')) { renderManageScreen(getPrevPlayerId(localUiState.activePlayerId)); return; }
+
+        // Lógica de manipulação de fichas (local antes de confirmar)
+        if (target.closest('#bet-chip-selector')) {
+            const type = target.dataset.chipType;
+            const player = state.players.find(p => p.id === localUiState.activePlayerId);
+            const chipsInHand = player.chips[type] || 0;
+            const chipsInBet = localUiState.currentBet[type] || 0;
+            if (chipsInHand > chipsInBet) { 
+                localUiState.currentBet[type] = chipsInBet + 1;
                 renderBetVisuals(localUiState.activePlayerId); 
             }
             return;
         }
-        if (target.closest('#bet-stack-visualizer .chip-btn')) {
-            const type = target.closest('.chip-btn').dataset.chipType;
+        if (target.closest('#bet-stack-visualizer')) {
+            const type = target.dataset.chipType;
             if ((localUiState.currentBet[type] || 0) > 0) {
                  localUiState.currentBet[type]--;
-            } else {
-                 const player = state.players.find(p => p.id === localUiState.activePlayerId);
-                 if ((player.roundBet[type] || 0) > 0) {
-                     player.roundBet[type]--;
-                     player.chips[type]++;
-                     sendStateUpdate(); // Envia o estado atualizado
-                 }
+                 if (localUiState.currentBet[type] === 0) delete localUiState.currentBet[type];
+                 renderBetVisuals(localUiState.activePlayerId);
             }
-            renderBetVisuals(localUiState.activePlayerId);
             return;
         }
-        if (target.closest('#bet-confirm-btn')) {
-            const player = state.players.find(p => p.id === localUiState.activePlayerId);
-            Object.entries(localUiState.currentBet).forEach(([type, count]) => {
-                player.chips[type] -= count;
-                player.roundBet[type] = (player.roundBet[type] || 0) + count;
-            });
-            sendStateUpdate();
-            const nextPlayerId = getNextPlayerId(localUiState.activePlayerId);
-            renderBetScreen(nextPlayerId);
-            return;
-        }
-        if (target.closest('#clear-bet-btn')) {
+        if (target.matches('#clear-bet-btn')) {
             localUiState.currentBet = {};
             renderBetVisuals(localUiState.activePlayerId);
             return;
         }
-        if (target.closest('#end-betting-btn') || target.closest('#end-betting-btn-home')) {
-            handleEndBetting();
-            return;
-        }
-        if (target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(localUiState.activePlayerId)); return; }
-        if (target.closest('#bet-prev-player')) { renderBetScreen(getPrevPlayerId(localUiState.activePlayerId)); return; }
-        
-        // Tela de Gerenciamento
-        if (target.closest('#manage-player-name .edit-icon')) {
-            const player = state.players.find(p => p.id === localUiState.activePlayerId);
-            const newName = prompt('Digite o novo nome:', player.name);
-            if (newName && newName.trim()) {
-                player.name = newName.trim();
-                sendStateUpdate();
-            }
-            return;
-        }
-        if (target.closest('#manage-chip-selector .chip-btn')) {
-            const type = target.closest('.chip-btn').dataset.chipType;
+        if (target.closest('#manage-chip-selector')) {
+            const type = target.dataset.chipType;
             localUiState.manageChips[type] = (localUiState.manageChips[type] || 0) + 1;
             renderManageVisuals(localUiState.activePlayerId);
             return;
         }
-        if (target.closest('#manage-stack-visualizer .chip-btn')) {
-            const type = target.closest('.chip-btn').dataset.chipType;
-            const player = state.players.find(p => p.id === localUiState.activePlayerId);
-            if(player.chips[type] + (localUiState.manageChips[type] || 0) > 0) {
-                localUiState.manageChips[type] = (localUiState.manageChips[type] || 0) - 1;
-                renderManageVisuals(localUiState.activePlayerId);
-            }
+        if (target.closest('#manage-stack-visualizer')) {
+            const type = target.dataset.chipType;
+            localUiState.manageChips[type] = (localUiState.manageChips[type] || 0) - 1;
+            renderManageVisuals(localUiState.activePlayerId);
             return;
         }
-        if (target.closest('#manage-save-btn')) {
-            const player = state.players.find(p => p.id === localUiState.activePlayerId);
-            Object.entries(localUiState.manageChips).forEach(([type, count]) => { player.chips[type] = Math.max(0, (player.chips[type] || 0) + count); });
-            sendStateUpdate();
-            switchScreen('home');
-            return;
-        }
-        if (target.closest('#manage-next-player')) { renderManageScreen(getNextPlayerId(localUiState.activePlayerId)); return; }
-        if (target.closest('#manage-prev-player')) { renderManageScreen(getPrevPlayerId(localUiState.activePlayerId)); return; }
         
-        // Tela de Configurações do Timer
-        if (target.closest('#timer-start-pause-btn')) { sendTimerAction('startPause'); return; }
-        if (target.closest('#timer-reset-btn')) { sendTimerAction('reset'); return; }
-        if (target.closest('#timer-next-level-btn')) { sendTimerAction('nextLevel'); return; }
-        if (target.closest('#timer-prev-level-btn')) { sendTimerAction('prevLevel'); return; }
-
-        // Ações genéricas de cancelar/voltar
-        if(target.closest('.home-btn')) { switchScreen('home'); return; }
+        // Ações do Timer
+        if (target.matches('#timer-start-pause-btn')) { sendTimerAction('startPause'); return; }
+        if (target.matches('#timer-reset-btn')) { sendTimerAction('reset'); return; }
+        if (target.matches('#timer-next-level-btn')) { sendTimerAction('nextLevel'); return; }
+        if (target.matches('#timer-prev-level-btn')) { sendTimerAction('prevLevel'); return; }
     });
 
     document.getElementById('timer-input').addEventListener('change', (e) => {
-        if (!state.timer.isRunning) {
+        if (!state.timer?.isRunning) {
             sendTimerAction('changeDuration', parseInt(e.target.value));
         }
     });
@@ -548,19 +488,26 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('gameStateUpdate', (newState) => {
         console.log('Estado recebido do servidor:', newState);
         state = newState;
+        // Renderiza a tela principal sempre
         renderAll();
-        // Se uma tela de sub-menu estiver aberta, atualize-a também
-        if (localUiState.activeScreen === 'bet') renderBetVisuals(localUiState.activePlayerId);
-        if (localUiState.activeScreen === 'manage') renderManageVisuals(localUiState.activePlayerId);
-        if (localUiState.activeScreen === 'order') renderOrderScreen();
+        // Se uma tela de sub-menu estiver aberta, atualize-a também para refletir as mudanças
+        switch(localUiState.activeScreen) {
+            case 'bet':
+                renderBetVisuals(localUiState.activePlayerId);
+                break;
+            case 'manage':
+                renderManageVisuals(localUiState.activePlayerId);
+                break;
+            case 'order':
+                renderOrderScreen();
+                break;
+        }
     });
     
     socket.on('playSound', () => {
-        // Initialize AudioContext on user interaction if not already
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
         playSound();
     });
-
 });
